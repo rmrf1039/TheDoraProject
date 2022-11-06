@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Signika:wght@300;400;600&display=swap');
+.navbar {
+  font-family: 'Signika', sans-serif;
+  padding-top: 1.5rem;
+  padding-bottom: 1rem;
+  z-index: 100;
+}
+.navbar-brand {
+  top:1.5rem;
+  left: 50%;
+  transform: translate(-50%, 0);
+  color: #fff;
+}
+.nav-link {
+  font-size: 18px;
+}
+.nav-link.active {
+  font-weight: bold;
+  color: #fff !important;
+}
+.nav-menu .nav-link {
+  margin-right: 1rem;
+  color: #fff;
+}
+.nav-social-media .nav-link {
+  margin-left: 1rem;
+  filter: invert(93%) sepia(100%) saturate(1%) hue-rotate(13deg) brightness(105%) contrast(101%);
+}
+
+
+.background {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  height: 80vh;
+  width: 100vw;
+  overflow: hidden;
+
+  background-image: url("../img/index.jpg");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+.background > svg {
+  width: 100vw;
+  position: absolute;
+  bottom: 0;
+  z-index: 3;
+}
+.background > .frogy-mask {
+  height: calc(100%);
+  width: 100%;
+  position: absolute;
+  z-index: 2;
+  border-bottom: 1px solid #fff;
+  background-color: rgba(0, 0, 0, .1);
+
+  -webkit-backdrop-filter: saturate(100%) blur(5px);
+  backdrop-filter: saturate(100%) blur(5px);
+
+  transition: background-color 0.5s cubic-bezier(0.28, 0.11, 0.32, 1);
+  -webkit-transition-property: background-color, -webkit-backdrop-filter;
+  transition-property: background-color, -webkit-backdrop-filter;
+  transition-property: background-color, backdrop-filter;
+  transition-property: background-color, backdrop-filter, -webkit-backdrop-filter;
+}
+
+.main {
+  position: relative;
+  z-index: 50;
+}
+.slogan {
+  color: #fff;
+  text-align: center;
+  margin: 4rem 0;
+  font-size: 6rem;
+
+  font-family: 'Pacifico', cursive;
+}
+.slogan:hover {
+  animation: tilt-n-move-shaking .2s infinite;
+}
+
+
+@keyframes tilt-n-move-shaking {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(2px, 2px) rotate(1deg); }
+  50% { transform: translate(0, 0) rotate(0eg); }
+  75% { transform: translate(-2px, 2px) rotate(-1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}

@@ -57,7 +57,7 @@ body {
   height: 80vh;
   width: 100vw;
   overflow: hidden;
-
+  border-bottom: 1px solid #fff;
   background-image: url('../img/index.jpg');
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -95,7 +95,6 @@ body {
   margin: 0;
   width: 100vw;
   padding: 0 calc(1.5rem / 2) 100px;
-
 
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
@@ -226,7 +225,8 @@ a.blog_post img.icon {
 .article .content h3 {
   color: #db7337;
 }
-.article .content p {
+.article .content p,
+ol.p {
   font-size: 1.2rem;
   line-height: 2rem;
   color: #304868;
@@ -252,6 +252,10 @@ a.blog_post img.icon {
 .article .content img.ratio34-pic {
   object-fit: cover;
   aspect-ratio: 3/4;
+}
+.article .content img.ratio43-pic {
+  object-fit: cover;
+  aspect-ratio: 4/3;
 }
 .article .content img.ratio11-pic {
   object-fit: cover;
@@ -293,6 +297,16 @@ a.blog_post img.icon {
 }
 .article .content .text-box > div.position-absolute p {
   color: #fff;
+}
+
+#korea .tips-box {
+  background-color: #f8ede3 !important;
+}
+#germany .tips-box {
+  background-color: #eef1ff !important;
+}
+#japan .tips-box {
+  background-color: #f1e4c0 !important;
 }
 
 footer p {
@@ -339,6 +353,9 @@ footer > svg {
   .scroll-window > div::after {
     padding-right: calc((100vw - 1140px + (1.5rem * 0.5)) / 2);
   }
+  .article .cover-img h1 {
+    font-size: 6rem;
+  }
 }
 @media only screen and (min-width: 1400px) {
   .scroll-window {
@@ -349,6 +366,14 @@ footer > svg {
   }
 }
 
+@media only screen and (max-width: 992px) {
+  .article .content .img-margin-up {
+    margin-top: 0 !important;
+  }
+  .article .cover-img h1 {
+    font-size: 6rem;
+  }
+}
 @media only screen and (max-width: 768px) {
   .navbar {
     background-color: rgba(0, 0, 0, 0.1);
@@ -362,6 +387,9 @@ footer > svg {
   .article .content .img-margin-up {
     margin-top: 0 !important;
   }
+  .article .cover-img h1 {
+    font-size: 6rem;
+  }
 }
 @media only screen and (max-width: 375px) {
   .slogan {
@@ -372,7 +400,7 @@ footer > svg {
     padding: 1rem;
   }
   .article .cover-img h1 {
-    font-size: 4rem;
+    font-size: 3.5rem;
   }
   .article .content .content-img {
     padding: 0rem;

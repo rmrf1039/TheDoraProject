@@ -193,8 +193,9 @@ a.blog_post img.icon {
   color: #fff;
 
   font-weight: 800;
-  font-size: 12rem;
+  font-size: 5.5rem;
   font-family: 'Righteous', cursive;
+  padding: 0;
 
   text-shadow: rgba(0, 0, 0, 0.5) 0px 20px 25px;
 }
@@ -282,6 +283,7 @@ ol.p {
   border-radius: 15px;
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
+  overflow-y: scroll;
 }
 .article .content .text-box.p-0 > div.position-absolute {
   width: 100%;
@@ -343,7 +345,7 @@ footer > svg {
     padding-right: calc((100vw - 960px - (1.5rem * 0.5)) / 2);
   }
   .article .cover-img h1 {
-    font-size: 6rem;
+    font-size: 5.5rem;
   }
 }
 @media only screen and (min-width: 1200px) {
@@ -354,7 +356,7 @@ footer > svg {
     padding-right: calc((100vw - 1140px + (1.5rem * 0.5)) / 2);
   }
   .article .cover-img h1 {
-    font-size: 6rem;
+    font-size: 5.5rem;
   }
 }
 @media only screen and (min-width: 1400px) {
@@ -371,7 +373,7 @@ footer > svg {
     margin-top: 0 !important;
   }
   .article .cover-img h1 {
-    font-size: 6rem;
+    font-size: 5.5rem;
   }
 }
 @media only screen and (max-width: 768px) {
@@ -388,7 +390,7 @@ footer > svg {
     margin-top: 0 !important;
   }
   .article .cover-img h1 {
-    font-size: 6rem;
+    font-size: 5.5rem;
   }
 }
 @media only screen and (max-width: 375px) {
@@ -400,7 +402,7 @@ footer > svg {
     padding: 1rem;
   }
   .article .cover-img h1 {
-    font-size: 3.5rem;
+    font-size: 3rem;
   }
   .article .content .content-img {
     padding: 0rem;
@@ -410,5 +412,10 @@ footer > svg {
   }
   .article .content h3 {
     padding-left: 0 !important;
+  }
+  .article .content .text-box > div.position-absolute {
+    height: 100%;
+    width: 100%;
+    top: 0;
   }
 }

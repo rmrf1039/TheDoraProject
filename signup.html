@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Dora Project</title>
+
+    <script src="./src/js/vue.global.js"></script>
+    <script src="./src/js/axios.js"></script>
+    <script src="./src/js/vue.cookie.js"></script>
+
+    <link rel="stylesheet" href="./src/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./src/css/app.css" />
+    <link rel="stylesheet" href="./src/css/form.css" />
+  </head>
+
+  <body>
+    <div id="app">
+      <nav class="navbar navbar-expand-lg position-relative">
+        <div class="container-lg">
+          <a class="navbar-brand position-absolute" href="./index.html">
+            <img src="./src/img/icon/logo.svg" height="24" class="me-2" />
+            Dora The Explorer
+          </a>
+
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <img src="./src/img/icon/menu.svg" width="24" />
+          </button>
+
+          <div class="collapse navbar-collapse d-lg-flex justify-content-lg-between" id="navbarSupportedContent">
+            <ul class="navbar-nav nav-menu">
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="./index.html">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="./login.html">Login</a>
+              </li>
+            </ul>
+
+            <ul class="navbar-nav nav-social-media">
+              <li class="nav-item">
+                <a class="nav-link" href="https://www.instagram.com/cylu.io/" target="”_blank”">
+                  <img src="./src/img/icon/instagram.svg" height="24" width="24" />
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="https://www.youtube.com/channel/UCZo6An42CWtYIwnqjHa8IAw" target="”_blank”">
+                  <img src="./src/img/icon/youtube.svg" height="24" width="24" />
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <div class="main">
+        <h1 class="slogan">Sign up</h1>
+
+        <div class="container">
+          <div class="row">
+            <div class="col-12 col-md-6 offset-md-3 col-lg-4 offset-lg-4">
+              <form class="d-flex flex-column"  @submit.prevent="onSubmit">
+                <div class="mb-3">
+                  <label for="inputEmail" class="form-label">Email address</label>
+                  <input type="email" class="form-control" id="inputEmail" v-model="inputEmail" maxlength="25">
+                  <label class="error" v-if="inputsError.email">{{ inputsError.email }}</label>
+                </div>
+                <div class="mb-3">
+                  <label for="inputPassword" class="form-label">Password</label>
+                  <input type="password" class="form-control" id="inputPassword" v-model="inputPassword" maxlength="25">
+                  <label class="error" v-if="inputsError.password">{{ inputsError.password }}</label>
+                </div>
+                <div class="mb-3">
+                  <label for="inputConfirmedPassword" class="form-label">Confirmed Password</label>
+                  <input type="password" class="form-control" id="inputConfirmedPassword" v-model="inputConfirmedPassword" maxlength="25">
+                  <label class="error" v-if="inputsError.confirmedPassword">{{ inputsError.confirmedPassword }}</label>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3" :disabled="isSubmitting">Register</button>
+              </form>
+              <p class="mt-3">Already have an account? <a href="./login.html">Login</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const { createApp, use } = Vue;
+
+      createApp({
+        data() {
+          return {
+            inputEmail: '',
+            inputPassword: '',
+            inputConfirmedPassword: '',
+
+            inputsError: {
+              email: '',
+              password: '',
+              confirmedPassword: ''
+            },
+
+            isSubmitting: false
+          };
+        },
+        mounted() {
+          if (this.$cookies.get('login')) {
+            alert('Please logout first to register a new account, moving to Home page');
+            window.location.assign("http://localhost:8888/index.html");
+          }
+        },
+        methods: {
+          onSubmit() {
+            //Checking
+            this.inputsError.email = this.inputsError.password = this.inputsError.confirmedPassword = '';
+
+            if (this.inputEmail == '') {
+              this.inputsError.email = 'Email address cannot be empty';
+            } 
+
+            if (this.inputPassword == '') {
+              this.inputsError.password = 'Password cannot be empty';
+            }
+
+            if (this.inputConfirmedPassword == '') {
+              this.inputsError.confirmedPassword = 'Confirmed Password cannot be empty';
+            } else {
+              if (this.inputPassword != this.inputConfirmedPassword) {
+                this.inputsError.confirmedPassword = 'Password is unmatched with Confirmed Password'
+              }
+            }
+
+            //ajax submission
+            if (this.inputsError.email + this.inputsError.password + this.inputsError.confirmedPassword == '') {
+              this.isSubmitting = true;
+
+              axios
+                .post('http://localhost:8888/server/user.php?action=signup', {
+                  email: this.inputEmail,
+                  password: this.inputPassword
+                })
+                .then((res) => {
+                  if (res.data.status == 'OK') {
+                    alert('Register successfully, redirecting to Login page');
+                    window.location.assign("./login.html")
+                  } else {
+                    console.log(res.data.msg);
+
+                    this.inputsError.email = 'Email address is already registered';
+                  }
+                })
+                .finally(() => {
+                  this.isSubmitting = false;
+                });
+            }
+          }
+        },
+      }).use($cookies).mount('#app');
+    </script>
+    <script src="./src/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

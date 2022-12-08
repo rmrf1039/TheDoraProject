@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Dora Project</title>
+
+    <script src="./src/js/vue.global.js"></script>
+    <script src="./src/js/axios.js"></script>
+    <script src="./src/js/vue.cookie.js"></script>
+
+    <link rel="stylesheet" href="./src/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./src/css/app.css" />
+  </head>
+
+  <body>
+    <div id="app">
+      <nav class="navbar navbar-expand-lg position-absolute navbar-light">
+        <div class="container-lg">
+          <a class="navbar-brand position-absolute" href="./index.html">
+            <img src="./src/img/icon/logo.svg" height="24" class="me-2" />
+            Dora The Explorer
+          </a>
+
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <img src="./src/img/icon/menu.svg" width="24" />
+          </button>
+
+          <div class="collapse navbar-collapse d-lg-flex justify-content-lg-between" id="navbarSupportedContent">
+            <ul class="navbar-nav nav-menu">
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="./index.html">Home</a>
+              </li>
+              <li class="nav-item" v-if="!isLogin">
+                <a class="nav-link" aria-current="page" href="./login.html">Login</a>
+              </li>
+              <li class="nav-item" v-if="isLogin">
+                <a class="nav-link" aria-current="page" :href="'./editor.html?id=' + id">Edit</a>
+              </li>
+              <li class="nav-item" v-if="isLogin">
+                <a class="nav-link" aria-current="page" v-on:click="$cookies.remove('login');isLogin=0">Logout</a>
+              </li>
+            </ul>
+
+            <ul class="navbar-nav nav-social-media">
+              <li class="nav-item">
+                <a class="nav-link" href="https://www.instagram.com/cylu.io/" target="”_blank”">
+                  <img src="./src/img/icon/instagram.svg" height="24" width="24" />
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="https://www.youtube.com/channel/UCZo6An42CWtYIwnqjHa8IAw" target="”_blank”">
+                  <img src="./src/img/icon/youtube.svg" height="24" width="24" />
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <div class="main article">
+        <div class="container-fluid g-0">
+          <div class="cover-img d-flex justify-content-between align-items-center flex-column mb-5" :style="'background-image: url('+ inputCoverImg +')'">
+            <div class="gradient-box-reverse"></div>
+            <div class="container">
+              <div class="row">
+                <div :class="(inputSections.length > 0 && inputSections[0].contents && (inputSections[0].contents[0].alignment == 'right' && inputSections[0].contents[0].imgs)) ? 'col-xl-7 offset-xl-5 col-lg-6 offset-lg-6' : 'col-lg-6'" class="col-12">
+                  <h1 class="mt-5">{{ inputTitle }}</h1>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="content" v-for="(sec, i) in inputSections" :key="i" :class="{'container': !sec.fullframe, 'container-fluid p-0': sec.fullframe}">
+            <!-- Video -->
+            <div class="row mb-5 pb-5" v-if="sec.video">
+              <div class="col-12 d-flex align-items-center flex-column">
+                <h1 class="text-center mb-3">{{ sec.title }}</h1>
+                <div class="video">
+                  <iframe :src="sec.video" title="astronut dressing" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fullframe -->
+            <div class="fullframe mb-5 position-relative" v-else-if="!sec.title && sec.img">
+              <img :src="sec.img" width="100" />
+
+              <div v-if="sec.tips" class="tips pb-3 position-absolute d-flex justify-content-center align-items-end">
+                <img src="./src/img/icon/tips.svg" height="32" width="32" class="me-3">
+                <p class="m-0">
+                    <strong>TIPS:</strong> {{ sec.tips }}
+                </p>
+            </div>
+            </div>
+
+            <!-- Text -->
+            <div class="row mb-5" v-else-if="sec.contents">
+              <div v-for="content in sec.contents" class="col-12" :class="'col-lg-' + (12 / sec.contents.length)">
+                <div class="row">
+                  <div
+                    class="d-flex flex-column col-12 mt-0 mt-xl-0"
+                    :class="{
+                  'col-lg-6': content.imgs && content.imgs.length > 0, 
+                  'col-xl-6 col-lg-6': content.imgs && content.imgs.length > 0 && content.alignment == 'left',
+                  'offset-xl-1 order-0 order-lg-1': content.imgs && content.alignment == 'right',
+                  'col-lg-8 offset-lg-2': content.alignment == 'center'
+                }"
+                  >
+                    <h1 :class="{ 'order-1 text-center': content.alignment == 'center' }">{{ content.title }}</h1>
+                    <h3 :class="{ 'order-0 text-center': content.alignment == 'center', 'ps-5 mb-5': content.alignment != 'center'}">{{ content.subTitle }}</h3>
+
+                    <div class="row order-2">
+                      <div v-for="con_unit in content.content" class="col-12" :class="'col-lg-' + (12 / content.content.length)">
+                        <p v-if="con_unit.text" class="mb-5" :class="{ 'order-2 text-center': content.alignment == 'center' }" v-html="con_unit.text"></p>
+                        <div v-if="con_unit.tips" class="tips-box d-flex align-items-center mb-5" :style="{ 'background-color': tagColor }">
+                          <img src="./src/img/icon/tips.svg" height="24" width="24" class="me-3" />
+                          <p class="m-0"><strong>TIPS:</strong> {{ con_unit.tips }}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Normal image -->
+                  <div
+                    v-if="content.imgs && content.imgs.length < 3 && content.alignment != 'center'"
+                    class="col-lg-6 col-12 mb-5"
+                    :class="{ 
+                      'mt-lg-0 order-1 order-lg-0': content.alignment == 'right',
+                      'order-1 offset-xl-1': content.alignment != 'right',
+                      'col-xl-4': content.imgs,
+                      'col-xl-5': content.imgs && content.imgs.length == 1 && content.alignment == 'left'
+                  }"
+                  >
+                    <div v-for="(img, img_i) in content.imgs" :key="img_i" class="content-img" :class="{ 'img-margin-up': img.mt, 'p-0': img.borderless, 'mt-3 ms-0 ms-xl-5': img_i > 0 }">
+                      <img
+                        :class="(img.ratio) ? 'ratio' + img.ratio + '-pic' : 'ratio34-pic'"
+                        :src="img.src"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Image gallery -->
+                  <div v-if="(content.imgs && content.imgs.length == 2 && content.alignment == 'center') || (content.imgs && content.imgs.length > 2)" class="col-12">
+                    <div class="row">
+                      <div class="col-12 mb-3 mb-md-0 d-flex flex-column" v-for="(img, img_i) in content.imgs" :key="img_i" :class="'col-md-' + (12 / content.imgs.length)">
+                        <div class="content-img mb-3 position-relative" :class="{ 'order-1': img.tips && img_i % 2 == 0 , 'p-0': img.borderless, 'text-box': img.description, 'only-title': img.description && !img.description.text}">
+                          <img class="gallery-pic" :src="img.src" :class="(img.ratio) ? 'ratio' + img.ratio + '-pic' : 'ratio34-pic'" :style="(img.tips) ? 'aspect-ratio: 3/3.14' : ''" />
+
+                          <div v-if="img.description" class="position-absolute" :class="{ 'd-flex align-items-end': img.description && !img.description.text }">
+                            <h4 class="font-bold">{{ img.description.title }}</h4>
+                            <p class="mt-3">{{ img.description.text }}</p>
+                          </div>
+                        </div>
+
+                        <div v-if="img.tips" :class="{ 'order-0 mb-3': img.tips && img_i % 2 == 0  }" class="tips-box d-flex align-items-center mt-3 mt-md-2" :style="{ 'background-color': tagColor }">
+                          <img src="./src/img/icon/tips.svg" height="24" class="me-3" />
+                          <p class="m-0"><strong>TIPS:</strong> {{ img.tips }}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tips Box -->
+                  <div v-if="content.tips" class="row">
+                    <div v-for="(tips, tip_i) in content.tips" :key="tip_i" class="col-lg-6 col-12"
+                    :class="{
+                      'col-xl-5': 1 - Math.floor((tip_i - 1) / 2) % 2 != 1,
+                      'col-xl-7': 1 - Math.floor((tip_i - 1) / 2) % 2 == 1,
+                    }">
+                      <div class="tips-box d-flex align-items-center mb-3" :style="{ 'background-color': tagColor }">
+                        <img src="./src/img/icon/tips.svg" height="24px" class="me-3" />
+                        <p class="m-0"><strong>TIPS:</strong> {{ tips }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="main-gradient mt-5">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+          <path fill="#fff" fill-opacity="1" d="M0,32L48,74.7C96,117,192,203,288,213.3C384,224,480,160,576,133.3C672,107,768,117,864,144C960,171,1056,213,1152,192C1248,171,1344,85,1392,42.7L1440,0L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"></path>
+        </svg>
+
+        <div class="container pb-2">
+          <p class="text-center">&copy; Copyright 2022. Made by Team 15.</p>
+        </div>
+      </footer>
+
+      <!-- Back to Top -->
+      <div v-on:click="scrollTop()" class="position-fixed back-to-top p-2">
+        <img height="24" src="./src/img/icon/arrow_up.svg">
+      </div>
+
+      <script src="./src/js/bootstrap.bundle.min.js"></script>
+    </div>
+
+    <script>
+      const { createApp } = Vue;
+
+      createApp({
+        data() {
+          return {
+            id: null,
+            inputTitle: '',
+            inputCoverImg: '',
+            tagColor: '',
+            inputSections: [],
+            isLogin: this.$cookies.get('login'),
+          };
+        },
+        mounted() {
+          var param_id = new URL(location.href).searchParams.get('id');
+
+          if (param_id) {
+            this.getBlog(param_id);
+          } else {
+            alert('Please visit with blog id');
+            history.go(-1);
+          }
+        },
+        methods: {
+          scrollTop() {
+            window.scrollTo(0,0)
+          },
+
+          getBlog(id) {
+            axios
+              .get('http://localhost:8888/server/blog.php?id=' + id)
+              .then((res) => {
+                if(res.data.status == 'OK') {
+                  this.id = res.data.result.id;
+                  this.inputTitle = res.data.result.title;
+                  this.inputCoverImg = res.data.result.cover_img;
+                  this.tagColor = res.data.result.tag_color;
+                  this.inputSections = JSON.parse(res.data.result.sections);
+                } else {
+                  alert('The blog isn\'t existed, redirecting to Home page');
+                  window.location.assign("./index.html");
+                }
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+          }
+        },
+      }).use($cookies).mount('#app');
+    </script>
+  </body>
+</html>

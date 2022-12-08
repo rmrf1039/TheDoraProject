@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Dora Project</title>
+
+    <script src="./src/js/vue.global.js"></script>
+    <script src="./src/js/axios.js"></script>
+    <script src="./src/js/vue.cookie.js"></script>
+
+    <link rel="stylesheet" href="./src/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./src/css/app.css" />
+    <link rel="stylesheet" href="./src/css/form.css" />
+
+    <style>
+      .main img {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid #efefef;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="app">
+      <nav class="navbar navbar-expand-lg position-relative">
+        <div class="container-lg">
+          <a class="navbar-brand position-absolute" href="./index.html">
+            <img src="./src/img/icon/logo.svg" height="24" class="me-2" />
+            Dora The Explorer
+          </a>
+
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <img src="./src/img/icon/menu.svg" width="24" />
+          </button>
+
+          <div class="collapse navbar-collapse d-lg-flex justify-content-lg-between" id="navbarSupportedContent">
+            <ul class="navbar-nav nav-menu">
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="./index.html">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" :class="{ active: id == null }" aria-current="page" href="./editor.html">Create a blog</a>
+              </li>
+              <li class="nav-item" v-if="isLogin">
+                <a class="nav-link" aria-current="page" v-on:click="$cookies.remove('login');isLogin=0;" href="./index.html">Logout</a>
+              </li>
+            </ul>
+
+            <ul class="navbar-nav nav-social-media">
+              <li class="nav-item">
+                <a class="nav-link" href="https://www.instagram.com/cylu.io/" target="”_blank”">
+                  <img src="./src/img/icon/instagram.svg" height="24" width="24" />
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="https://www.youtube.com/channel/UCZo6An42CWtYIwnqjHa8IAw" target="”_blank”">
+                  <img src="./src/img/icon/youtube.svg" height="24" width="24" />
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <div class="main">
+        <div class="container">
+          <div class="row mt-5 mb-5">
+            <div class="col-12 col-md-8 offset-md-2 col-lg-8 offset-lg-2">
+              <div class="d-flex flex-column form">
+                <h4 class="mb-3 d-flex justify-content-between">
+                  General Information
+                  <button v-if="id != null" class="btn btn-outline-danger" v-on:click="deleteBlog">Delete the Blog</button></h4>
+                <div class="ps-3">
+                  <div class="mb-3">
+                    <label for="inputTitle" class="form-label">Blog Title</label>
+                    <input type="text" class="form-control" id="inputTitle" v-model="inputTitle" />
+                    <label class="error" v-if="inputsError.title">{{ inputsError.title }}</label>
+                  </div>
+                  <div class="mb-3">
+                    <label for="exampleColorInput" class="form-label">Tips' Color</label>
+                    <input type="color" class="form-control form-control-color" v-model="tagColor" title="Tips' color" />
+                  </div>
+                  <div class="mb-3">
+                    <label for="formFile" class="form-label">Blog cover image</label>
+                    <div class="row">
+                      <div class="col-12 col-md-6 col-lg-4 mb-3 mb-md-0">
+                        <label class="error" v-if="!inputCoverImg">(No image)</label>
+                        <img :src="inputCoverImg" :class="{ 'empty-img': !inputCoverImg }">
+                      </div>
+                      <div class="col-12 col-md-6 col-lg-8">
+                        <label for="formFile" class="form-label">Upload new image</label>
+                        <input class="form-control" type="file" id="coverImg" v-on:change="uploadImage($event, ['inputCoverImg'])" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <hr />
+
+                <div class="pt-3 d-flex flex-column" v-for="(section, section_i) in inputSections" :key="section_i">
+                  <h4 class="d-flex justify-content-between">
+                    Section #{{ section_i + 1 }}
+                    <button class="btn btn-outline-danger" v-on:click="inputSections.splice(section_i, 1)">Delete</button>
+                  </h4>
+                  <div class="mb-3">
+                    <label class="form-label">Content Type</label>
+                    <select class="form-select" aria-label="Default select example" v-model="section.type" v-on:Change="changeSectionType(section_i, section.type)">
+                      <option disabled value="">Select content type</option>
+                      <option value="text">Text</option>
+                      <option value="fullframe">Fullframe</option>
+                      <option value="video">Video</option>
+                      <option value="tips">Tips Box</option>
+                    </select>
+                  </div>
+
+                  <!-- Text -->
+                  <div v-if="section.type == 'text'" class="d-flex flex-column">
+                    <section v-for="(content, content_i) in section.contents" :key="content_i" class="ps-3 ps-lg-5 d-flex flex-column">
+                      <h5 class="d-flex justify-content-between">
+                        Content #{{ content_i + 1 }}
+                        <button v-if="content_i > 0" class="btn btn-outline-danger" v-on:click="section.contents.splice(content_i, 1)">Delete</button>
+                      </h5>
+
+                      <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control" v-model="content.title" />
+                      </div>
+
+                      <div class="mb-3">
+                        <label class="form-label">Subtitle</label>
+                        <input class="form-control" v-model="content.subTitle" />
+                      </div>
+
+                      <div v-for="(text, text_i) in content.content" :key="text_i" class="ps-3 ps-lg-5">
+                        <h5 class="d-flex justify-content-between">
+                          Text #{{ text_i + 1 }}
+                          <button v-if="text_i > 0" class="btn btn-outline-danger" v-on:click="content.content.splice(text_i, 1)">Delete</button>
+                        </h5>
+
+                        <div class="mb-3">
+                          <label class="form-label">Content</label>
+                          <textarea class="form-control" aria-label="Section Content" v-model="text.text"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="form-label">Tips</label>
+                          <input type="text" class="form-control" v-model="text.tips" />
+                        </div>
+                      </div>
+                      <button v-if="content.content.length < 2 && section.contents.length == 1 && content.imgs.length < 1" class="btn btn-secondary mb-3 ms-5" v-on:click="content.content.push({})">Add Text</button>
+
+                      <div v-if="section.contents.length == 1 && content.content.length == 1" class="mb-3">
+                        <label class="form-label">Content alignment</label>
+                        <select class="form-select" aria-label="Default select example" v-model="content.alignment">
+                          <option disabled>Select content aligment</option>
+                          <option value="left">Left</option>
+                          <option value="center">Center</option>
+                          <option value="right">Right</option>
+                        </select>
+                      </div>
+
+                      <div v-if="section.contents.length == 1 && content.content.length == 1" class="mb-3 d-flex flex-column">
+                        <div class="row ps-3 ps-lg-5 mb-3" v-for="(img, img_i) in content.imgs" :key="img_i">
+                          <div class="col-12">
+                            <h5 class="d-flex justify-content-between">
+                              Image #{{ img_i + 1 }}
+                              <button class="btn btn-outline-danger" v-on:click="content.imgs.splice(img_i, 1)">Delete</button>
+                            </h5>
+                          </div>
+                          <div class="col-12 col-md-6 col-lg-4 mb-3 mb-md-0">
+                            <label class="error" v-if="!img.src">(No image)</label>
+                            <img :src="img.src" :class="{ 'empty-img': !img.src }">
+                          </div>
+                          <div class="col-12 col-md-6 col-lg-8">
+                            <label for="formFile" class="form-label">Upload new image</label>
+                            <input class="form-control mb-3" type="file" :id="'img_' + section_i + content_i + img_i" v-on:change="uploadImage($event, ['inputSections', section_i, 'contents', content_i, 'imgs', img_i, 'src'])" />
+
+                            <div class="row">
+                              <div class="col-12 col-md-6 mb-3">
+                                <label class="form-label">Ratio</label>
+                                <select class="form-select" v-model="img.ratio">
+                                  <option disabled>Select image ratio</option>
+                                  <option value="34">3:4</option>
+                                  <option value="43">4:3</option>
+                                  <option value="11">1:1</option>
+                                </select>
+                              </div>
+                              <div class="form-check form-switch col-12 col-md-6 mb-3 d-flex flex-column">
+                                <label class="form-label">Borderless</label>
+                                <input class="form-check-input ms-0" type="checkbox" v-model="img.borderless">
+                                
+                                <div class="mt-3 d-flex flex-column" v-if="section_i == 0 && img_i == 0">
+                                  <label class="form-label">Top Overflow</label>
+                                  <input class="form-check-input ms-0" type="checkbox" v-model="img.mt">
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="mb-3" v-if="content.imgs.length > 2">
+                              <label class="form-label">Tips</label>
+                              <input type="text" class="form-control" v-model="img.tips" />
+                            </div>
+
+                            <button v-if="content.imgs.length > 2 && !img.description" class="btn btn-secondary mb-3" v-on:click="img.description = {}">Add Description</button>
+                            <div v-if="img.description" class="mb-3 ps-3 ps-lg-5">
+                              <label class="form-label d-flex justify-content-between">
+                                Description
+                                <button class="btn btn-outline-danger btn-sm" v-on:click="delete img.description">Remove</button> 
+                              </label>
+
+                              <div class="mb-3">
+                                <label class="form-label">Title</label>
+                                <input type="text" class="form-control" v-model="img.description.title" />
+                              </div>
+                              <div class="mb-3">
+                                <label class="form-label">Text</label>
+                                <input type="text" class="form-control" v-model="img.description.text" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <button v-if="content.imgs && content.imgs.length < 3 && content.content.length == 1" class="btn btn-secondary mb-3 ms-5" v-on:click="content.imgs.push({ ratio: '34' })">Add Image</button>
+                      </div>
+
+                    </section>
+                    <button v-if="section.contents && section.contents.length < 2" class="btn btn-secondary mb-3 ms-5" v-on:click="addContent(section.contents)">Add Content</button>
+                  </div>
+
+                  <!-- Fullframe -->
+                  <div v-else-if="section.type == 'fullframe'" class="ps-3 ps-lg-5">
+                    <div class="mb-3">
+                      <label for="formFile" class="form-label">Image</label>
+                      <div class="row">
+                        <div class="col-12 col-md-6 col-lg-4 mb-3 mb-md-0">
+                          <label class="error" v-if="!section.img">(No image)</label>
+                          <img :src="section.img" :class="{ 'empty-img': !section.img }">
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-8">
+                          <label for="formFile" class="form-label">Upload new image</label>
+                          <input class="form-control" type="file" :id="'img_' + section_i" v-on:change="uploadImage($event, ['inputSections', section_i, 'img'])" />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Tips</label>
+                      <input type="text" class="form-control" v-model="section.tips" />
+                    </div>
+                  </div>
+
+                  <!-- Tips -->
+                  <div v-else-if="section.type == 'tips'" class="d-flex flex-column ps-3 ps-lg-5">
+                    <div class="mb-3">
+                      <label class="form-label">Title</label>
+                      <input type="text" class="form-control" v-model="section.contents[0].title" />
+                    </div>
+
+                    <div class="input-group mb-3" v-for="(tips, tips_i) in section.contents[0].tips" :key="tips_i">
+                      <span class="input-group-text">#{{ tips_i + 1 }}</span>
+                      <input type="text" class="form-control" v-model="section.contents[0].tips[tips_i]" />
+                      <button v-if="tips_i > 0" class="btn btn-outline-danger" type="button" v-on:click="section.contents[0].tips.splice(tips_i, 1)">Delete</button>
+                    </div>
+                    <button class="btn btn-secondary mb-3" v-on:click="section.contents[0].tips.push('')">Add Tips</button>
+                  </div>
+
+                  <!-- Video -->
+                  <div v-else-if="section.type == 'video'">
+                    <section class="ps-3 ps-lg-5 d-flex flex-column">
+                      <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control" v-model="section.title" />
+                      </div>
+
+                      <div class="mb-3">
+                        <label class="form-label">Video Source</label>
+                        <input type="text" class="form-control" v-model="section.video" />
+                      </div>
+                    </section>
+                  </div>
+                  <hr />
+                </div>
+
+                <button class="btn btn-secondary mt-3 mb-3" v-on:click="addSection">Add Section</button>
+                <button class="btn btn-primary" :disabled="isSubmitting" v-on:click="onSubmit">Confirm</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+       <!-- Back to Top -->
+      <div v-on:click="scrollTop()" class="position-fixed back-to-top p-2">
+        <img height="24" src="./src/img/icon/arrow_up.svg">
+      </div>
+    </div>
+
+    <script>
+      const { createApp, use, ref } = Vue;
+      
+      createApp({
+        data() {
+          return {
+            id: null,
+            inputTitle: '',
+            inputCoverImg: '',
+            tagColor: '#ffeb3b',
+            inputSections: [],
+
+            inputsError: {
+              title: '',
+            },
+
+            isLogin: this.$cookies.get('login'),
+            isSubmitting: false,
+          };
+        },
+        mounted() {
+          if (!this.isLogin) {
+            alert('You need to login first, redirecting to Login page');
+            window.location.assign("http://localhost:8888/login.html");
+          }
+
+          var param_id = new URL(location.href).searchParams.get('id');
+
+          if (param_id) {
+            this.getBlog(param_id);
+          } else {
+            this.addSection();
+          }
+        },
+        methods: {
+          scrollTop() {
+            window.scrollTo(0,0)
+          },
+
+          addSection() {
+            this.inputSections.push({
+              type: 'text',
+              contents: [],
+            });
+
+            this.addContent(this.inputSections[this.inputSections.length - 1].contents);
+          },
+          changeSectionType(index, type) {
+            switch (type) {
+              case 'fullframe':
+                this.inputSections[index] = {
+                  type: 'fullframe',
+                  fullframe: true,
+                  img: '',
+                };
+                break;
+
+              case 'video':
+                this.inputSections[index] = {
+                  type: 'video',
+                  title: '',
+                  video: '',
+                };
+                break;
+
+              case 'tips':
+                this.inputSections[index] = {
+                  type: 'tips',
+                  contents: [
+                    {
+                      title: '',
+                      tips: [],
+                    },
+                  ],
+                };
+
+                this.inputSections[index].contents[0].tips.push('');
+                break;
+
+              default:
+                this.inputSections[index] = {
+                  type: 'text',
+                  contents: [],
+                };
+
+                this.addContent(this.inputSections[index].contents);
+                break;
+            }
+          },
+          addContent(contents) {
+            contents.push({
+              content: [],
+              alignment: 'left',
+              imgs: []
+            });
+
+            contents[contents.length - 1].content.push({})
+
+            //Remove exccess texts if any
+            contents.forEach((content) => {
+              content.content.splice(1, 1);
+            });
+          },
+
+          uploadImage(event, var_path) {
+            let formData = new FormData();
+
+            formData.append('file', event.target.files[0]);
+
+            const response = axios.post('http://localhost:8888/server/image.php', formData
+            , {
+              header: {
+                'Content-Type': 'multipart/form-data'
+              }
+            })
+            .then((res) => {
+              if (res.data.status == 'OK') {
+                var r = this;
+
+                var_path.forEach((p, i) => {
+                  if (i == var_path.length - 1) {
+                    r[p] = res.data.img_path;
+                  } else {
+                    r = r[p]
+                  }
+                });
+              } else {
+                console.log(res.data.msg);
+              }
+            });
+          },
+          getBlog(id) {
+            axios
+              .get('http://localhost:8888/server/blog.php?id=' + id)
+              .then((res) => {
+                if(res.data.status == 'OK') {
+                  this.id = res.data.result.id;
+                  this.inputTitle = res.data.result.title;
+                  this.inputCoverImg = res.data.result.cover_img;
+                  this.tagColor = res.data.result.tag_color;
+                  this.inputSections = JSON.parse(res.data.result.sections);
+                } else {
+                  if (res.data.msg == 'not existed') {
+                    alert('The blog isn\'t existed, redirecting to an empty blog editor');
+                    window.location.assign("./editor.html");
+                  }
+                  console.log(res.data.msg);
+                }
+              })
+              .catch(err => console.log(err));
+          },
+          deleteBlog() {
+            axios
+              .delete('http://localhost:8888/server/blog.php', {
+                data: {
+                  id: this.id 
+                }})
+              .then((res) => {
+                if (res.data.status == 'OK') {
+                  alert('delete successfully, redirecting to Home page');
+                  window.location.assign("./index.html");
+                } else {
+                  console.log(res.data.msg);
+                  alert(res.data.msg);
+                }
+              })
+              .catch(err => console.log(err))
+              .finally(() => {
+                this.isSubmitting = false;
+              });
+          },
+          onSubmit() {
+            //Checking
+            this.inputsError.title = false;
+
+            if (this.inputTitle == '') {
+              this.inputsError.title = 'Title cannot be empty';
+            }
+
+            //ajax submission
+            if (this.inputsError.title == '') {
+              this.isSubmitting = true;
+
+              axios
+                .post('http://localhost:8888/server/blog.php', {
+                  id: this.id,
+                  inputTitle: this.inputTitle,
+                  inputCoverImg: this.inputCoverImg,
+                  tagColor: this.tagColor,
+                  inputSections: JSON.stringify(this.inputSections),
+                })
+                .then((res) => {
+                  if (res.data.status == 'OK') {
+                    alert('success, moving to the blog');
+                    window.location.assign("./blog.html?id=" + res.data.id);
+                  } else {
+                    console.log(res.data.msg);
+                  }
+                })
+                .catch(err => console.log(err))
+                .finally(() => {
+                  this.isSubmitting = false;
+                });
+            }
+          },
+        },
+      }).use($cookies).mount('#app');
+    </script>
+  </body>
+</html>

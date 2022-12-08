@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Dora Project</title>
+
+    <script src="./src/js/vue.global.js"></script>
+    <script src="./src/js/axios.js"></script>
+    <script src="./src/js/vue.cookie.js"></script>
+    <script src="./src/js/vue.infinite.loading.js"></script>
+
+    <link rel="stylesheet" href="./src/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./src/css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/v3-infinite-loading@1.2.1/lib/style.css"
+    />
+  </head>
+
+  <body>
+    <div id="app">
+      <nav class="navbar navbar-expand-lg position-relative navbar-light">
+        <div class="container-lg">
+          <a class="navbar-brand position-absolute" href="./index.html">
+            <img src="./src/img/icon/logo.svg" height="24" class="me-2" />
+            Dora The Explorer
+          </a>
+
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <img src="./src/img/icon/menu.svg" width="24" />
+          </button>
+
+          <div class="collapse navbar-collapse d-lg-flex justify-content-lg-between mt-3 mt-lg-0" id="navbarSupportedContent">
+            <ul class="navbar-nav nav-menu">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="./index.html">Home</a>
+              </li>
+              <li class="nav-item" v-if="!isLogin">
+                <a class="nav-link" aria-current="page" href="./login.html">Login</a>
+              </li>
+              <li class="nav-item" v-if="isLogin">
+                <a class="nav-link" aria-current="page" href="./editor.html">Create a blog</a>
+              </li>
+              <li class="nav-item" v-if="isLogin">
+                <a class="nav-link" aria-current="page" v-on:click="$cookies.remove('login');isLogin=0">Logout</a>
+              </li>
+            </ul>
+
+            <ul class="navbar-nav nav-social-media">
+              <li class="nav-item">
+                <a class="nav-link" href="https://www.instagram.com/cylu.io/" target="”_blank”">
+                  <img src="./src/img/icon/instagram.svg" height="24" width="24" />
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="https://www.youtube.com/channel/UCZo6An42CWtYIwnqjHa8IAw" target="”_blank”">
+                  <img src="./src/img/icon/youtube.svg" height="24" width="24" />
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <div class="background">
+        <div class="frogy-mask"></div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="#fff" fill-opacity="1" d="M0,96L60,133.3C120,171,240,245,360,229.3C480,213,600,107,720,96C840,85,960,171,1080,181.3C1200,192,1320,128,1380,96L1440,64L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path></svg>
+      </div>
+
+      <div class="main">
+        <h1 class="slogan text-white ">Jump In! Vamanos.</h1>
+
+        <div class="scroll-window">
+          <div class="row pt-5">
+            <div class="col-xl-4 col-lg-5 col-md-6 mb-4 pe-3 ps-3" v-for="(b, i) in blogs" :key="i">
+              <a class="blog_post" :href="'./blog.html?id=' + b.id">
+                <img class="cover" :src="b.cover_img" />
+                <h4 class="mt-4 mb-0 d-flex justify-content-between">
+                  {{ b.title }}
+                  <img class="icon" src="./src/img/icon/arrow_right.svg" height="28" width="28" />
+                </h4>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <infinite-loading @infinite="loadBlogs"></infinite-loading>
+    </div>
+
+    <script>
+      const { createApp, use } = Vue;
+
+      createApp({
+        data() {
+          return {
+            isLogin: this.$cookies.get('login'),
+            isLoading: false,
+            blogs: [],
+          };
+        },
+        mounted() {
+          this.loadBlogs();
+        },
+        methods: {
+          loadBlogs() {
+            if (this.isLoading) return;
+
+            this.isLoading = true;
+            
+            axios
+            .get('http://localhost:8888/server/search.php', { 
+              params: {
+                last_id: (this.blogs.length) ? this.blogs[this.blogs.length - 1].id : 0,
+                limit: 5,
+              }
+            })
+            .then((res) => {
+              if(res.data.status == 'OK') {
+                this.blogs = this.blogs.concat(res.data.results);
+              }
+            })
+            .catch(function (error) {
+              console.log(error);
+            })
+            .finally(() => {
+              this.isLoading = false;
+            });
+          }
+        },
+      })
+      .use($cookies)
+      .component("infinite-loading", V3InfiniteLoading.default)
+      .mount('#app');
+    </script>
+    <script src="./src/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

@@ -71,9 +71,9 @@
       <div class="main">
         <h1 class="slogan text-white ">Jump In! Vamanos.</h1>
 
-        <div class="scroll-window">
+        <div class="container">
           <div class="row pt-5">
-            <div class="col-xl-4 col-lg-5 col-md-6 mb-4 pe-3 ps-3" v-for="(b, i) in blogs" :key="i">
+            <div class="col-xl-4 col-md-6 mb-4 pe-3 ps-3" v-for="(b, i) in blogs" :key="i">
               <a class="blog_post" :href="'./blog.html?id=' + b.id">
                 <img class="cover" :src="b.cover_img" />
                 <h4 class="mt-4 mb-0 d-flex justify-content-between">
@@ -108,7 +108,7 @@
             if (this.isLoading) return;
 
             this.isLoading = true;
-            
+
             axios
             .get('http://localhost:8888/server/search.php', { 
               params: {
